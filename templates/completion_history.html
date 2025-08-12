@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Completion History - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Task Completion History</h1>
+            <p class="text-muted mb-0">View all your completed tasks and their status</p>
+        </div>
+        <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    {% if completions|length > 0 %}
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <i class="fas fa-tasks text-primary fa-2x mb-2"></i>
+                    <h4 class="mb-1">{{ completions|length }}</h4>
+                    <small class="text-muted">Total Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <i class="fas fa-clock text-warning fa-2x mb-2"></i>
+                    <h4 class="mb-1">{{ completions|selectattr('status', 'equalto', 'approved')|list|length }}</h4>
+                    <small class="text-muted">Awaiting Payment</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <i class="fas fa-hourglass-half text-info fa-2x mb-2"></i>
+                    <h4 class="mb-1">{{ completions|selectattr('status', 'equalto', 'pending')|list|length }}</h4>
+                    <small class="text-muted">Pending Approval</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <i class="fas fa-pound-sign text-success fa-2x mb-2"></i>
+                    <h4 class="mb-1">£{{ "%.2f"|format(completions|selectattr('status', 'equalto', 'paid')|sum(attribute='task.monetary_value')|float) }}</h4>
+                    <small class="text-muted">Total Paid</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Options -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="card-title mb-3">
+                <i class="fas fa-filter me-2"></i>Quick Filters
+            </h6>
+            <div class="row">
+                <div class="col-lg-2 col-md-4 mb-2">
+                    <a href="{{ url_for('completion_history') }}" class="btn {{ 'btn-primary' if current_filter == 'all' else 'btn-outline-primary' }} w-100">
+                        All Tasks
+                    </a>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-2">
+                    <a href="{{ url_for('completion_history', filter='paid') }}" class="btn {{ 'btn-success' if current_filter == 'paid' else 'btn-outline-success' }} w-100">
+                        Paid
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 mb-2">
+                    <a href="{{ url_for('completion_history', filter='approved') }}" class="btn {{ 'btn-warning' if current_filter == 'approved' else 'btn-outline-warning' }} w-100">
+                        Awaiting Payment
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <a href="{{ url_for('completion_history', filter='pending') }}" class="btn {{ 'btn-info' if current_filter == 'pending' else 'btn-outline-info' }} w-100">
+                        Pending Approval
+                    </a>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-2">
+                    <a href="{{ url_for('completion_history', filter='rejected') }}" class="btn {{ 'btn-danger' if current_filter == 'rejected' else 'btn-outline-danger' }} w-100">
+                        Rejected
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Completion History -->
+    <div class="card border-0 shadow">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-history me-2"></i>
+                {% if current_filter == 'approved' %}
+                    Awaiting Payment Completions ({{ completions|length }})
+                {% elif current_filter == 'paid' %}
+                    Paid Completions ({{ completions|length }})
+                {% elif current_filter == 'pending' %}
+                    Pending Approval Completions ({{ completions|length }})
+                {% elif current_filter == 'rejected' %}
+                    Rejected Completions ({{ completions|length }})
+                {% else %}
+                    All Completions ({{ completions|length }})
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if completions|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0">Task</th>
+                            <th class="border-0">Completion Date</th>
+                            <th class="border-0">Value</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0">Submitted</th>
+                            <th class="border-0">Reviewed</th>
+                            <th class="border-0">Notes/Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for completion in completions %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <h6 class="mb-1">{{ completion.task.title }}</h6>
+                                    {% if completion.task.category %}
+                                    <small class="text-muted">{{ completion.task.category }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <strong>{{ completion.completion_date.strftime('%d/%m/%Y') }}</strong>
+                                <br>
+                                <small class="text-muted">{{ completion.completion_date.strftime('%A') }}</small>
+                            </td>
+                            <td>
+                                {% if completion.status == 'rejected' %}
+                                <strong class="text-danger">
+                                    <i class="fas fa-pound-sign me-1"></i>0.00
+                                </strong>
+                                <br><small class="text-danger">REJECTED</small>
+                                {% elif completion.status == 'paid' %}
+                                <strong class="text-success">
+                                    <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(completion.task.monetary_value) }}
+                                </strong>
+                                <br><small class="text-success"><strong>PAID</strong></small>
+                                {% elif completion.status == 'approved' %}
+                                <strong class="text-warning">
+                                    <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(completion.task.monetary_value) }}
+                                </strong>
+                                <br><small class="text-warning"><strong>AWAITING PAYMENT</strong></small>
+                                {% else %}
+                                <strong class="text-info">
+                                    <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(completion.task.monetary_value) }}
+                                </strong>
+                                <br><small class="text-info">PENDING APPROVAL</small>
+                                {% endif %}
+                                {% if completion.task.priority != 'normal' %}
+                                <br>
+                                <span class="badge bg-{{ 'danger' if completion.task.priority == 'high' else 'secondary' }} badge-sm">
+                                    {{ completion.task.priority.title() }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if completion.status == 'paid' else 'warning' if completion.status == 'approved' else 'danger' if completion.status == 'rejected' else 'info' }} fs-6">
+                                    <i class="fas fa-{{ 'check-circle' if completion.status == 'paid' else 'clock' if completion.status == 'approved' else 'times-circle' if completion.status == 'rejected' else 'hourglass-half' }} me-1"></i>
+                                    {% if completion.status == 'approved' %}Awaiting Payment{% elif completion.status == 'paid' %}Paid{% else %}{{ completion.status.title() }}{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ completion.submitted_at.strftime('%d/%m/%Y') }}<br>
+                                    {{ completion.submitted_at.strftime('%H:%M') }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if completion.reviewed_at %}
+                                <small class="text-muted">
+                                    {{ completion.reviewed_at.strftime('%d/%m/%Y') }}<br>
+                                    {{ completion.reviewed_at.strftime('%H:%M') }}
+                                </small>
+                                {% if completion.reviewer %}
+                                <br><small class="text-muted">by {{ completion.reviewer.get_full_name() }}</small>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    {% if completion.admin_notes %}
+                                    <button type="button" class="btn btn-outline-{{ 'danger' if completion.status == 'rejected' else 'info' }} btn-sm" 
+                                            data-bs-toggle="popover" 
+                                            data-bs-placement="left"
+                                            data-bs-content="{{ completion.admin_notes }}"
+                                            title="{{ 'Rejection Reason' if completion.status == 'rejected' else 'Admin Notes' }}">
+                                        <i class="fas fa-{{ 'exclamation-triangle' if completion.status == 'rejected' else 'comment' }}"></i>
+                                    </button>
+                                    {% endif %}
+                                    
+                                    {% if completion.status == 'rejected' and completion.task.is_active %}
+                                    <a href="{{ url_for('complete_task', task_id=completion.task.id) }}" 
+                                       class="btn btn-outline-primary btn-sm"
+                                       title="Resubmit this task for approval">
+                                        <i class="fas fa-redo me-1"></i>Resubmit
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if not completion.admin_notes and completion.status != 'rejected' %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <img src="https://pixabay.com/get/gcf969191bb385af0dca92c88e90f311c7ccdf6c080b9de5aa5aa0368c978185dc73dfa35721560c90718ff4ee20a57f129054e5cbd5285811a0c891972724690_1280.jpg" 
+                     alt="Task completion" class="img-fluid mb-3 rounded" style="max-height: 200px; opacity: 0.7; object-fit: cover;">
+                <h5 class="text-muted">No Completed Tasks Yet</h5>
+                <p class="text-muted mb-3">Start completing tasks to build your history and track your progress.</p>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-success">
+                    <i class="fas fa-tasks me-2"></i>View Available Tasks
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize popovers for admin notes
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+});
+</script>
+{% endblock %}

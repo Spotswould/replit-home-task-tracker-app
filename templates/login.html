@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Home Task Tracker{% endblock %}
+
+{% block content %}
+<!-- Mobile Welcome Section -->
+<div class="d-lg-none bg-primary text-white py-4">
+    <div class="container text-center">
+        <h1 class="h2 fw-bold mb-2">Welcome to Home Task Tracker</h1>
+        <p class="mb-0">Streamline your household task management</p>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row min-vh-100">
+        <!-- Hero Image Section -->
+        <div class="col-lg-6 d-none d-lg-block p-0">
+            <div class="hero-image position-relative h-100">
+                <img src="https://pixabay.com/get/g31ab6cf3915802a14ebb35a840b3be16d04cf03b4cdef197f85514a8abcb25401bbf0d6259f7b113addcb729c87e1a015c484a62907d9cd33da1a81956629e30_1280.jpg" 
+                     alt="Professional home cleaning" class="img-fluid h-100 w-100 object-fit-cover">
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-primary bg-opacity-10"></div>
+                <div class="position-absolute top-0 start-0 p-4 text-white d-flex flex-column justify-content-center h-100">
+                    <div class="welcome-content">
+                        <h2 class="h1 fw-bold mb-3">Welcome to Home Task Tracker</h2>
+                        <p class="fs-5 mb-4">Streamline your household task management with our professional tracking system.</p>
+                        <div class="feature-highlights">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span>Role-based task management</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-pound-sign me-2"></i>
+                                <span>Payment tracking & reports</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                <span>Quality approval workflow</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Login Form Section -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center">
+            <div class="w-100" style="max-width: 400px;">
+                <div class="text-center mb-4">
+                    <i class="fas fa-home text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h1 class="h3 fw-bold mb-1">Sign In</h1>
+                    <p class="text-muted">Access your task management dashboard</p>
+                </div>
+
+                <div class="card border-0 shadow">
+                    <div class="card-body p-4">
+                        <form method="POST" novalidate>
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3">
+                                {{ form.email.label(class="form-label fw-semibold") }}
+                                {{ form.email(class="form-control form-control-lg") }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.password.label(class="form-label fw-semibold") }}
+                                <div class="input-group">
+                                    {{ form.password(class="form-control form-control-lg", id="passwordField") }}
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="border-left: none;">
+                                        <i class="fas fa-eye" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </form>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('forgot_password') }}" class="text-decoration-none text-muted">
+                                <small><i class="fas fa-key me-1"></i>Forgot your password?</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-2">Don't have an account?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-image {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+.object-fit-cover {
+    object-fit: cover;
+}
+.min-vh-100 {
+    min-height: 100vh;
+}
+#togglePassword {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#togglePassword:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('passwordField');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (togglePassword && passwordField && eyeIcon) {
+        togglePassword.addEventListener('click', function() {
+            // Toggle the type attribute
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            if (type === 'text') {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+                togglePassword.setAttribute('title', 'Hide password');
+            } else {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+                togglePassword.setAttribute('title', 'Show password');
+            }
+        });
+        
+        // Set initial tooltip
+        togglePassword.setAttribute('title', 'Show password');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Profile Header -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary rounded-circle p-3 me-3">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                                <div>
+                                    <h2 class="h4 mb-1">{{ current_user.get_full_name() }}</h2>
+                                    <p class="text-muted mb-1">{{ current_user.email }}</p>
+                                    <span class="badge bg-{{ 'primary' if current_user.is_admin() else 'success' }}">
+                                        <i class="fas fa-{{ 'crown' if current_user.is_admin() else 'user' }} me-1"></i>
+                                        {{ current_user.role.title() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="text-muted">
+                                <small>Member since</small><br>
+                                <strong>{{ current_user.created_at.strftime('%B %Y') }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Information -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Account Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">First Name</label>
+                            <div class="form-control-plaintext">{{ current_user.first_name }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Last Name</label>
+                            <div class="form-control-plaintext">{{ current_user.last_name }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Email Address</label>
+                            <div class="form-control-plaintext">{{ current_user.email }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Account Type</label>
+                            <div class="form-control-plaintext">
+                                <span class="badge bg-{{ 'primary' if current_user.is_admin() else 'success' }} fs-6">
+                                    {{ current_user.role.title() }}
+                                </span>
+                            </div>
+                        </div>
+                        {% if current_user.is_worker() and current_user.admin %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Administrator</label>
+                            <div class="form-control-plaintext">{{ current_user.admin.get_full_name() }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Admin Email</label>
+                            <div class="form-control-plaintext">{{ current_user.admin.email }}</div>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Account Status</label>
+                            <div class="form-control-plaintext">
+                                <span class="badge bg-success fs-6">
+                                    <i class="fas fa-check-circle me-1"></i>Active
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Member Since</label>
+                            <div class="form-control-plaintext">{{ current_user.created_at.strftime('%d %B %Y') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if current_user.is_admin() %}
+            <!-- Admin Information -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-crown me-2"></i>Administrator Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-users text-primary fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ current_user.workers|length }}</h4>
+                                <small class="text-muted">Active Workers</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-tasks text-success fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ current_user.created_tasks|length }}</h4>
+                                <small class="text-muted">Tasks Created</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-check-circle text-info fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ current_user.created_tasks|selectattr('is_active')|list|length }}</h4>
+                                <small class="text-muted">Active Tasks</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle me-3"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Admin Email for Workers</h6>
+                                <p class="mb-0">
+                                    Share your email address (<strong>{{ current_user.email }}</strong>) with new workers 
+                                    so they can register and be assigned to your account.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% elif current_user.is_worker() %}
+            <!-- Worker Information -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-hard-hat me-2"></i>Worker Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% set stats = worker_stats %}
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-tasks text-primary fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ stats.total_completed or 0 }}</h4>
+                                <small class="text-muted">Tasks Completed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ stats.approved_count or 0 }}</h4>
+                                <small class="text-muted">Approved</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-clock text-warning fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ stats.pending_count or 0 }}</h4>
+                                <small class="text-muted">Pending</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="border rounded p-3">
+                                <i class="fas fa-percentage text-info fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ "%.0f"|format(stats.approval_rate or 0) }}%</h4>
+                                <small class="text-muted">Approval Rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Change Password -->
+            <div class="card border-0 shadow">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Change Password
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile') }}">
+                        {{ password_form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ password_form.current_password.id }}" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>Current Password
+                                </label>
+                                {{ password_form.current_password }}
+                                {% if password_form.current_password.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in password_form.current_password.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ password_form.new_password.id }}" class="form-label">
+                                    <i class="fas fa-key me-1"></i>New Password
+                                </label>
+                                {{ password_form.new_password }}
+                                {% if password_form.new_password.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in password_form.new_password.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Minimum 6 characters</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ password_form.confirm_new_password.id }}" class="form-label">
+                                    <i class="fas fa-check-circle me-1"></i>Confirm New Password
+                                </label>
+                                {{ password_form.confirm_new_password }}
+                                {% if password_form.confirm_new_password.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in password_form.confirm_new_password.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Your password should be secure and not easily guessable
+                                </small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Delete Account</h6>
+                            <p class="text-muted mb-0">
+                                Permanently delete your account and all associated data. This action cannot be undone.
+                            </p>
+                        </div>
+                        <a href="{{ url_for('delete_account') }}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash-alt me-1"></i>Delete Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

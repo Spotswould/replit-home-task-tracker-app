@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Payment Reports</h1>
+            <p class="text-muted mb-0">Generate detailed payment reports for your workers</p>
+        </div>
+        <div class="d-none d-md-block">
+            <img src="https://cdn.pixabay.com/photo/2021/10/18/22/48/bar-chart-6722290_1280.png" 
+                 alt="Reports and analytics" class="rounded shadow" style="height: 60px; object-fit: cover;">
+        </div>
+    </div>
+
+    <!-- Report Generation Form -->
+    <div class="card border-0 shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-filter me-2"></i>Generate Report
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="row g-3 align-items-end">
+                {{ form.hidden_tag() }}
+                
+                <div class="col-md-2">
+                    {{ form.start_date.label(class="form-label fw-semibold") }}
+                    {{ form.start_date(class="form-control") }}
+                    {% if form.start_date.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.start_date.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-2">
+                    {{ form.end_date.label(class="form-label fw-semibold") }}
+                    {{ form.end_date(class="form-control") }}
+                    {% if form.end_date.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.end_date.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-2">
+                    {{ form.worker_id.label(class="form-label fw-semibold") }}
+                    {{ form.worker_id(class="form-control") }}
+                    {% if form.worker_id.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.worker_id.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-2">
+                    {{ form.status_filter.label(class="form-label fw-semibold") }}
+                    {{ form.status_filter(class="form-control") }}
+                    {% if form.status_filter.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.status_filter.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-2">
+                    {{ form.priority_filter.label(class="form-label fw-semibold") }}
+                    {{ form.priority_filter(class="form-control") }}
+                    {% if form.priority_filter.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.priority_filter.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-2">
+                    {{ form.task_status_filter.label(class="form-label fw-semibold") }}
+                    {{ form.task_status_filter(class="form-control") }}
+                    {% if form.task_status_filter.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.task_status_filter.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-4 offset-md-4 text-center">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-chart-line me-2"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-12">
+                    <hr class="my-2">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Period Buttons -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="card-title mb-3">
+                <i class="fas fa-clock me-2"></i>Quick Periods
+            </h6>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <button type="button" class="btn btn-outline-primary w-100 quick-period" 
+                            data-period="this-week">This Week</button>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button type="button" class="btn btn-outline-primary w-100 quick-period" 
+                            data-period="last-week">Last Week</button>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button type="button" class="btn btn-outline-primary w-100 quick-period" 
+                            data-period="this-month">This Month</button>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button type="button" class="btn btn-outline-primary w-100 quick-period" 
+                            data-period="last-month">Last Month</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Results -->
+    {% if report_data %}
+    <div class="card border-0 shadow">
+        <div class="card-header bg-transparent border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>
+                    Payment Report{% if report_data.single_worker %} - {{ report_data.worker.get_full_name() }}{% endif %}
+                </h5>
+                <div>
+                    <span class="badge bg-info me-2">{{ report_data.period }}</span>
+                    <a href="{{ url_for('export_report', 
+                              start_date=form.start_date.data.strftime('%Y-%m-%d'),
+                              end_date=form.end_date.data.strftime('%Y-%m-%d'),
+                              worker_id=form.worker_id.data,
+                              status_filter=form.status_filter.data,
+                              priority_filter=form.priority_filter.data,
+                              task_status_filter=form.task_status_filter.data) }}" 
+                       class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-download me-1"></i>Export CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if report_data.single_worker %}
+            <!-- Single Worker Report -->
+            <div class="row mb-4">
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-info text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-tasks fa-2x mb-2"></i>
+                            <h4 class="mb-1">{{ report_data.activity_data.count }}</h4>
+                            <p class="mb-0 small">Total Tasks</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-success text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.activity_data.paid_total) }}</h4>
+                            <p class="mb-0 small">Total Paid</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-warning text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.activity_data.awaiting_payment) }}</h4>
+                            <p class="mb-0 small">Awaiting Payment</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-danger text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-times-circle fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.activity_data.rejected_total) }}</h4>
+                            <p class="mb-0 small">Total Rejected</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card text-white text-center h-100" style="background-color: #8e44ad;">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-calculator fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.activity_data.total_value / report_data.activity_data.count if report_data.activity_data.count > 0 else 0) }}</h4>
+                            <p class="mb-0 small">Average per Task</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if report_data.activity_data.completions %}
+            <h6 class="mb-3">All Task Activity</h6>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Completed</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Reviewed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for completion in report_data.activity_data.completions %}
+                        <tr>
+                            <td>{{ completion.task_title }}</td>
+                            <td>{{ completion.completion_date.strftime('%d/%m/%Y') }}</td>
+                            <td class="fw-semibold">£{{ "%.2f"|format(completion.value) }}</td>
+                            <td>
+                                {% if completion.status == 'approved' %}
+                                    <span class="badge bg-warning">Awaiting Payment</span>
+                                {% elif completion.status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif completion.status == 'pending' %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                {% elif completion.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted">{{ completion.reviewed_date.strftime('%d/%m/%Y %H:%M') if completion.reviewed_date else 'Not reviewed' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-inbox text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                <h6 class="text-muted">No Task Activity</h6>
+                <p class="text-muted">No tasks completed during the selected period.</p>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- All Workers Report -->
+            <div class="row mb-4">
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-info text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <h4 class="mb-1">{{ report_data.workers|length }}</h4>
+                            <p class="mb-0 small">Workers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-success text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.grand_paid_total) }}</h4>
+                            <p class="mb-0 small">Total Paid</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-warning text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.grand_awaiting_payment) }}</h4>
+                            <p class="mb-0 small">Awaiting Payment</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card bg-danger text-white text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-times-circle fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.grand_rejected_total) }}</h4>
+                            <p class="mb-0 small">Total Rejected</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div class="card text-white text-center h-100" style="background-color: #8e44ad;">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <i class="fas fa-receipt fa-2x mb-2"></i>
+                            <h4 class="mb-1">£{{ "%.2f"|format(report_data.grand_paid_total + report_data.grand_awaiting_payment) }}</h4>
+                            <p class="mb-0 small">Total Liability</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if report_data.workers %}
+            <h6 class="mb-3">Detailed Worker Activity</h6>
+            {% for worker_id, data in report_data.workers.items() %}
+            <div class="card border-1 mb-4">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h6 class="mb-0">{{ data.worker.get_full_name() }}</h6>
+                            <small class="text-muted">{{ data.worker.email }}</small>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row text-center">
+                                <div class="col-2">
+                                    <div class="small text-muted">Tasks</div>
+                                    <div class="fw-bold text-primary">{{ data.activity_data.count }}</div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="small text-muted">Paid</div>
+                                    <div class="fw-bold text-success">£{{ "%.2f"|format(data.activity_data.paid_total) }}</div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="small text-muted">Awaiting Payment</div>
+                                    <div class="fw-bold text-warning">£{{ "%.2f"|format(data.activity_data.awaiting_payment) }}</div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="small text-muted">Rejected</div>
+                                    <div class="fw-bold text-danger">£{{ "%.2f"|format(data.activity_data.rejected_total) }}</div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="small text-muted">Average</div>
+                                    <div class="fw-bold text-info">£{{ "%.2f"|format(data.activity_data.total_value / data.activity_data.count if data.activity_data.count > 0 else 0) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if data.activity_data.completions %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Completed</th>
+                                    <th>Value</th>
+                                    <th>Status</th>
+                                    <th>Reviewed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for completion in data.activity_data.completions %}
+                                <tr>
+                                    <td>{{ completion.task_title }}</td>
+                                    <td>{{ completion.completion_date.strftime('%d/%m/%Y') }}</td>
+                                    <td class="fw-semibold">£{{ "%.2f"|format(completion.value) }}</td>
+                                    <td>
+                                        {% if completion.status == 'approved' %}
+                                            <span class="badge bg-warning">Awaiting Payment</span>
+                                        {% elif completion.status == 'paid' %}
+                                            <span class="badge bg-success">Paid</span>
+                                        {% elif completion.status == 'pending' %}
+                                            <span class="badge bg-secondary">Pending</span>
+                                        {% elif completion.status == 'rejected' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted">{{ completion.reviewed_date.strftime('%d/%m/%Y %H:%M') if completion.reviewed_date else 'Not reviewed' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3 text-muted">
+                        <i class="fas fa-inbox mb-2"></i>
+                        <div>No task activity for this period</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-user-slash text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                <h6 class="text-muted">No Worker Data</h6>
+                <p class="text-muted">No workers completed tasks during the selected period.</p>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quickPeriodButtons = document.querySelectorAll('.quick-period');
+    const startDateInput = document.querySelector('#start_date');
+    const endDateInput = document.querySelector('#end_date');
+    
+    quickPeriodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const period = this.dataset.period;
+            const today = new Date();
+            let startDate, endDate;
+            
+            switch(period) {
+                case 'this-week':
+                    const dayOfWeek = today.getDay();
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - daysToMonday);
+                    endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6);
+                    break;
+                    
+                case 'last-week':
+                    const lastWeekStart = new Date(today);
+                    const daysToLastMonday = (today.getDay() === 0 ? 6 : today.getDay() - 1) + 7;
+                    lastWeekStart.setDate(today.getDate() - daysToLastMonday);
+                    startDate = lastWeekStart;
+                    endDate = new Date(lastWeekStart);
+                    endDate.setDate(lastWeekStart.getDate() + 6);
+                    break;
+                    
+                case 'this-month':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                    
+                case 'last-month':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+            }
+            
+            startDateInput.value = startDate.toISOString().split('T')[0];
+            endDateInput.value = endDate.toISOString().split('T')[0];
+            
+            // Automatically submit the form after setting the dates
+            const form = startDateInput.closest('form');
+            if (form) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

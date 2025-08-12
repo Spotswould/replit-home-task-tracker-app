@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}About This App - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <div class="bg-primary rounded-circle p-4 d-inline-flex mb-3">
+            <i class="fas fa-info-circle fa-3x text-white"></i>
+        </div>
+        <h1 class="h2 mb-3">About Home Task Tracker</h1>
+        <p class="lead text-muted">A comprehensive task management system designed for households with role-based workflows and payment tracking.</p>
+    </div>
+
+    <!-- App Overview -->
+    <div class="card border-0 shadow mb-5">
+        <div class="card-header bg-primary text-white">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-home me-2"></i>What is Home Task Tracker?
+            </h4>
+        </div>
+        <div class="card-body">
+            <p class="mb-3">Home Task Tracker is a web-based application that helps families and households manage tasks efficiently with a structured approval system and payment tracking. The system features two distinct user roles:</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="bg-light rounded p-3 h-100">
+                        <h5 class="text-primary">
+                            <i class="fas fa-crown me-2"></i>Administrators
+                        </h5>
+                        <p class="mb-0">Create and manage tasks, approve completed work, and oversee household operations with full system control.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="bg-light rounded p-3 h-100">
+                        <h5 class="text-success">
+                            <i class="fas fa-user me-2"></i>Workers
+                        </h5>
+                        <p class="mb-0">Complete assigned tasks, track earnings, and submit work for approval with a simple, focused interface.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Administrator Workflow -->
+    <div class="card border-0 shadow mb-5">
+        <div class="card-header bg-primary text-white">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-crown me-2"></i>Administrator Workflow
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5 class="text-primary mb-3">Core Responsibilities</h5>
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">1</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Design Task System</h6>
+                                <p class="text-muted mb-0">Create tasks with descriptions, monetary values, priorities, and categories.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">2</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Quality Control</h6>
+                                <p class="text-muted mb-0">Review completed tasks and approve or reject work with feedback notes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">3</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Payment Oversight</h6>
+                                <p class="text-muted mb-0">Generate reports, track earnings, and manage payment calculations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <h5 class="text-primary mb-3">Key Features</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Task Management:</strong> Create, edit, and organize tasks with full control
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Approval Queue:</strong> Review and process completed tasks efficiently
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Financial Reports:</strong> Generate detailed payment reports and export data
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Worker Management:</strong> Oversee multiple workers and their performance
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Weekly Reset:</strong> Clear pending tasks for fresh start each week
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-lightbulb me-3 text-info"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Admin Tip</h6>
+                                <p class="mb-0">Use priorities and categories to help workers understand task importance and organize their work effectively.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Worker Workflow -->
+    <div class="card border-0 shadow mb-5">
+        <div class="card-header bg-success text-white">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-user me-2"></i>Worker Workflow
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5 class="text-success mb-3">Daily Process</h5>
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-success rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">1</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Browse Available Tasks</h6>
+                                <p class="text-muted mb-0">View tasks created by your administrator with values and priorities.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-success rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">2</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Complete Tasks</h6>
+                                <p class="text-muted mb-0">Choose tasks to complete and submit them with completion dates.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-success rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">3</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Track Progress</h6>
+                                <p class="text-muted mb-0">Monitor your completion history and approval status.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-success rounded-circle p-2 me-3 flex-shrink-0">
+                                <span class="text-white fw-bold">4</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Earn Payments</h6>
+                                <p class="text-muted mb-0">Approved tasks contribute to your weekly and total earnings.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <h5 class="text-success mb-3">Benefits & Features</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Clear Task Information:</strong> See task values, priorities, and descriptions
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Earnings Tracking:</strong> Monitor weekly earnings and approval rates
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Progress Visibility:</strong> Track pending, approved, and rejected tasks
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Simple Interface:</strong> Easy-to-use dashboard focused on task completion
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Achievement Tracking:</strong> View completion history and statistics
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-success mt-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-star me-3 text-success"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Worker Tip</h6>
+                                <p class="mb-0">Focus on high-priority tasks first and maintain quality to improve your approval rate!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment System -->
+    <div class="card border-0 shadow mb-5">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-pound-sign me-2"></i>Payment System
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-warning mb-3">How It Works</h5>
+                    <p class="mb-3">The Home Task Tracker uses a simple, transparent payment system:</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-arrow-right text-warning me-2"></i>
+                            Each task has a predetermined monetary value in UK pounds (£)
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-arrow-right text-warning me-2"></i>
+                            Workers earn payment only for approved tasks
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-arrow-right text-warning me-2"></i>
+                            Weekly and total earnings are automatically calculated
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-arrow-right text-warning me-2"></i>
+                            Administrators can generate detailed payment reports
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-warning mb-3">Quality Assurance</h5>
+                    <p class="mb-3">The approval system ensures quality and fairness:</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-shield-alt text-warning me-2"></i>
+                            All completed tasks require administrator approval
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-shield-alt text-warning me-2"></i>
+                            Rejected tasks include feedback for improvement
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-shield-alt text-warning me-2"></i>
+                            Payment is only made for approved, quality work
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-shield-alt text-warning me-2"></i>
+                            Complete audit trail for all transactions
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="card border-0 shadow">
+        <div class="card-header bg-info text-white">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-rocket me-2"></i>Getting Started
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-info mb-3">For Administrators</h5>
+                    <ol class="mb-4">
+                        <li class="mb-2">Log in with your administrator account</li>
+                        <li class="mb-2">Create worker accounts for family members</li>
+                        <li class="mb-2">Set up your first tasks with values and descriptions</li>
+                        <li class="mb-2">Monitor the approval queue for completed work</li>
+                        <li class="mb-2">Generate reports to track household productivity</li>
+                    </ol>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-info mb-3">For Workers</h5>
+                    <ol class="mb-4">
+                        <li class="mb-2">Log in with your worker account credentials</li>
+                        <li class="mb-2">Browse available tasks on your dashboard</li>
+                        <li class="mb-2">Complete tasks and submit them for approval</li>
+                        <li class="mb-2">Track your progress and earnings</li>
+                        <li class="mb-2">View your completion history and statistics</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('index') }}" class="btn btn-info btn-lg me-3">
+                    <i class="fas fa-home me-2"></i>Go to Dashboard
+                </a>
+                {% if current_user.is_admin() %}
+                <a href="{{ url_for('task_list') }}" class="btn btn-outline-info btn-lg">
+                    <i class="fas fa-tasks me-2"></i>Manage Tasks
+                </a>
+                {% endif %}
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.workflow-step {
+    transition: all 0.3s ease;
+}
+.workflow-step:hover {
+    transform: translateX(5px);
+}
+.card {
+    transition: transform 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

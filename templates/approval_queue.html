@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Approval Queue - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Quality Approval Queue</h1>
+            <p class="text-muted mb-0">Review and approve completed tasks from your workers</p>
+        </div>
+        {% if approvals|length > 0 %}
+        <div class="badge bg-warning text-dark fs-6">
+            {{ approvals|length }} Pending
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Approvals List -->
+    <div class="card border-0 shadow">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-clipboard-check me-2"></i>Pending Approvals
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if approvals|length > 0 %}
+            {% for approval in approvals %}
+            <div class="border-bottom p-4 {% if loop.last %}border-0{% endif %}">
+                <div class="row align-items-center">
+                    <!-- Task Information -->
+                    <div class="col-lg-6 mb-3 mb-lg-0">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-warning rounded-circle p-2 me-3 flex-shrink-0">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ approval.task.title }}</h6>
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-user me-1"></i>{{ approval.worker.get_full_name() }}
+                                    <span class="mx-2">•</span>
+                                    <i class="fas fa-calendar me-1"></i>Completed: {{ approval.completion_date.strftime('%d/%m/%Y') }}
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success fw-semibold">
+                                        <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(approval.task.monetary_value) }}
+                                    </span>
+                                    {% if approval.task.category %}
+                                    <span class="badge bg-light text-dark">{{ approval.task.category }}</span>
+                                    {% endif %}
+                                    <span class="badge bg-{{ 'danger' if approval.task.priority == 'high' else 'warning' if approval.task.priority == 'normal' else 'secondary' }}">
+                                        {{ approval.task.priority.title() }} Priority
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Details -->
+                    <div class="col-lg-3 mb-3 mb-lg-0">
+                        <div class="small text-muted">
+                            <div class="mb-1">
+                                <strong>Submitted:</strong><br>
+                                {{ approval.submitted_at.strftime('%d/%m/%Y at %H:%M') }}
+                            </div>
+                            {% if approval.task.description %}
+                            <div class="mt-2">
+                                <strong>Description:</strong><br>
+                                {{ approval.task.description[:80] }}{% if approval.task.description|length > 80 %}...{% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Approval Form -->
+                    <div class="col-lg-3">
+                        <form method="POST" action="{{ url_for('approve_completion', completion_id=approval.id) }}">
+                            <input type="hidden" name="completion_id" value="{{ approval.id }}"/>
+                            
+                            <div class="mb-2">
+                                <select name="status" class="form-select form-select-sm" required>
+                                    <option value="">Choose Action</option>
+                                    <option value="approved">✓ Approve</option>
+                                    <option value="rejected">✗ Reject</option>
+                                    <option value="paid">💰 Mark as Paid</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <textarea name="admin_notes" class="form-control form-control-sm" 
+                                         rows="2" placeholder="Optional notes..."></textarea>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-check me-1"></i>Submit Decision
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <div class="bg-light rounded-circle p-4 d-inline-flex mb-3">
+                    <i class="fas fa-check-double fa-3x text-success"></i>
+                </div>
+                <h5 class="text-muted">No Pending Approvals</h5>
+                <p class="text-muted mb-0">All task completions have been reviewed. Great job staying on top of quality control!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if approvals|length > 0 %}
+    <!-- Batch Actions Info -->
+    <div class="alert alert-info mt-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-lightbulb me-3 text-info"></i>
+            <div>
+                <h6 class="alert-heading mb-1">Quality Approval Tips</h6>
+                <p class="mb-0">
+                    Review each task completion carefully. Add notes to provide feedback to workers.
+                    Approved tasks will count toward their payment calculations.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.approval-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+.approval-card:hover {
+    border-left-color: #007bff;
+    box-shadow: 0 4px 15px rgba(0,123,255,0.1);
+}
+</style>
+{% endblock %}

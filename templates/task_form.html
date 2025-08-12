@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-4">
+                <a href="{% if current_user.is_admin() %}{{ url_for('task_list') if 'task' in title else url_for('admin_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" 
+                   class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 mb-1">{{ title }}</h1>
+                    {% if task %}
+                    <p class="text-muted mb-0">Modify task details and settings</p>
+                    {% else %}
+                    <p class="text-muted mb-0">{% if current_user.is_admin() %}Create a new task for your workers{% else %}Mark this task as completed{% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Task Form Card -->
+            <div class="card border-0 shadow">
+                {% if task and current_user.is_worker() %}
+                <!-- Worker Task Completion -->
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="mb-0">{{ task.title }}</h5>
+                            <small class="opacity-75">Complete this task</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    {% if task.description %}
+                    <div class="alert alert-light border-start border-success border-3 mb-4">
+                        <h6 class="mb-2">Task Description</h6>
+                        <p class="mb-0">{{ task.description }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="text-success mb-2">
+                                    <i class="fas fa-pound-sign fa-2x"></i>
+                                </div>
+                                <h4 class="mb-1">£{{ "%.2f"|format(task.monetary_value) }}</h4>
+                                <small class="text-muted">Task Value</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="text-info mb-2">
+                                    <i class="fas fa-tag fa-2x"></i>
+                                </div>
+                                <h6 class="mb-1">{{ task.category or 'General' }}</h6>
+                                <small class="text-muted">Category</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="text-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'normal' else 'secondary' }} mb-2">
+                                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                                </div>
+                                <h6 class="mb-1">{{ task.priority.title() }}</h6>
+                                <small class="text-muted">Priority</small>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                <!-- Admin Task Creation/Editing -->
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{{ 'edit' if task else 'plus' }} me-2"></i>
+                        {{ 'Edit Task' if task else 'Create New Task' }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                {% endif %}
+
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    {% if current_user.is_admin() %}
+                    <!-- Admin Task Form -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                {{ form.title.label(class="form-label fw-semibold") }}
+                                {{ form.title(class="form-control form-control-lg") }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.title.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.monetary_value.label(class="form-label fw-semibold") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">£</span>
+                                    {{ form.monetary_value(class="form-control form-control-lg") }}
+                                </div>
+                                {% if form.monetary_value.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.monetary_value.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        {{ form.description.label(class="form-label fw-semibold") }}
+                        {{ form.description(class="form-control", rows="4", placeholder="Detailed description of the task...", maxlength="200", id="taskDescription") }}
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            {% if form.description.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% else %}
+                                <div></div>
+                            {% endif %}
+                            <small class="text-muted">
+                                <span id="charCount">0</span> / 200 characters
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.category.label(class="form-label fw-semibold") }}
+                                {{ form.category(class="form-control", placeholder="e.g., Cleaning, Ironing, Gardening") }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.category.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.priority.label(class="form-label fw-semibold") }}
+                                {{ form.priority(class="form-control") }}
+                                {% if form.priority.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.priority.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% else %}
+                    <!-- Worker Task Completion Form -->
+                    <div class="form-group mb-4">
+                        {{ form.completion_date.label(class="form-label fw-semibold") }}
+                        {{ form.completion_date(class="form-control form-control-lg") }}
+                        {% if form.completion_date.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.completion_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            You can select past, present, or future dates for task completion.
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% if current_user.is_admin() %}{{ url_for('task_list') if task else url_for('admin_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-{{ 'success' if current_user.is_worker() else 'primary' }} btn-lg px-4">
+                            <i class="fas fa-{{ 'check' if current_user.is_worker() else 'save' }} me-2"></i>
+                            {% if current_user.is_worker() %}
+                                Submit Completion
+                            {% else %}
+                                {{ 'Update Task' if task else 'Create Task' }}
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const taskDescription = document.getElementById('taskDescription');
+    const charCount = document.getElementById('charCount');
+    
+    if (taskDescription && charCount) {
+        // Function to update character count
+        function updateCharCount() {
+            const currentLength = taskDescription.value.length;
+            const maxLength = 200;
+            const remaining = maxLength - currentLength;
+            
+            charCount.textContent = currentLength;
+            
+            // Change color based on remaining characters
+            const counterElement = charCount.parentElement;
+            if (remaining < 20) {
+                counterElement.classList.remove('text-muted', 'text-warning');
+                counterElement.classList.add('text-danger');
+            } else if (remaining < 50) {
+                counterElement.classList.remove('text-muted', 'text-danger');
+                counterElement.classList.add('text-warning');
+            } else {
+                counterElement.classList.remove('text-warning', 'text-danger');
+                counterElement.classList.add('text-muted');
+            }
+        }
+        
+        // Update on input
+        taskDescription.addEventListener('input', updateCharCount);
+        taskDescription.addEventListener('keyup', updateCharCount);
+        taskDescription.addEventListener('paste', function() {
+            // Small delay to allow paste to complete
+            setTimeout(updateCharCount, 10);
+        });
+        
+        // Initial count (for existing text in edit mode)
+        updateCharCount();
+    }
+});
+</script>
+{% endblock %}

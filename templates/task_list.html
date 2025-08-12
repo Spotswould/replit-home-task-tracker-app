@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Task Management</h1>
+            <p class="text-muted mb-0">Create and manage tasks for your workers</p>
+        </div>
+        <a href="{{ url_for('create_task') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create New Task
+        </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-filter me-2"></i>Filter Tasks
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="categoryFilter" class="form-label fw-semibold">Category</label>
+                    <select id="categoryFilter" class="form-control" onchange="applyFilters()">
+                        <option value="all" {{ 'selected' if current_category == 'all' else '' }}>All Categories</option>
+                        <option value="none" {{ 'selected' if current_category == 'none' else '' }}>No Category</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}" {{ 'selected' if current_category == category else '' }}>{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="priorityFilter" class="form-label fw-semibold">Priority</label>
+                    <select id="priorityFilter" class="form-control" onchange="applyFilters()">
+                        <option value="all" {{ 'selected' if current_priority == 'all' else '' }}>All Priorities</option>
+                        <option value="high" {{ 'selected' if current_priority == 'high' else '' }}>High</option>
+                        <option value="normal" {{ 'selected' if current_priority == 'normal' else '' }}>Normal</option>
+                        <option value="low" {{ 'selected' if current_priority == 'low' else '' }}>Low</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="statusFilter" class="form-label fw-semibold">Status</label>
+                    <select id="statusFilter" class="form-control" onchange="applyFilters()">
+                        <option value="all" {{ 'selected' if current_status == 'all' else '' }}>All Status</option>
+                        <option value="active" {{ 'selected' if current_status == 'active' else '' }}>Active</option>
+                        <option value="inactive" {{ 'selected' if current_status == 'inactive' else '' }}>Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks List -->
+    <div class="card border-0 shadow">
+        <div class="card-header bg-transparent border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tasks me-2"></i>Tasks ({{ tasks|length }})
+                    {% if current_category != 'all' or current_priority != 'all' or current_status != 'all' %}
+                    <span class="badge bg-info ms-2">Filtered</span>
+                    {% endif %}
+                </h5>
+                <div class="text-muted small">
+                    {% if current_category != 'all' or current_priority != 'all' or current_status != 'all' %}
+                    Showing filtered results
+                    {% else %}
+                    Showing all tasks
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if tasks|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0">Task</th>
+                            <th class="border-0">Category</th>
+                            <th class="border-0">Value</th>
+                            <th class="border-0">Priority</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0">Created</th>
+                            <th class="border-0 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <h6 class="mb-1">{{ task.title }}</h6>
+                                    {% if task.description %}
+                                    <small class="text-muted">{{ task.description[:60] }}{% if task.description|length > 60 %}...{% endif %}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if task.category %}
+                                <span class="badge bg-light text-dark">{{ task.category }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-success">
+                                    <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(task.monetary_value) }}
+                                </strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'normal' else 'secondary' }}">
+                                    {{ task.priority.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if task.is_active %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Active
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-pause-circle me-1"></i>Inactive
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ task.created_at.strftime('%d/%m/%Y') }}
+                                </small>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('edit_task', task_id=task.id) }}" 
+                                       class="btn btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if task.is_active %}
+                                    <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger" title="Deactivate"
+                                                onclick="return confirm('Are you sure you want to deactivate this task?')">
+                                            <i class="fas fa-pause"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST" action="{{ url_for('reactivate_task', task_id=task.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-success" title="Reactivate"
+                                                onclick="return confirm('Are you sure you want to reactivate this task?')">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-tasks text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                {% if current_category != 'all' or current_priority != 'all' or current_status != 'all' %}
+                <h5 class="text-muted">No Tasks Match Your Filters</h5>
+                <p class="text-muted mb-3">Try adjusting your filters or clear them to see all tasks.</p>
+                <button onclick="clearFilters()" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </button>
+                <a href="{{ url_for('create_task') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create New Task
+                </a>
+                {% else %}
+                <h5 class="text-muted">No Tasks Created Yet</h5>
+                <p class="text-muted mb-3">Create your first task to get started with managing your workers.</p>
+                <a href="{{ url_for('create_task') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Your First Task
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if tasks|length > 0 %}
+    <!-- Quick Stats -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <h4 class="text-primary">{{ tasks|selectattr('is_active')|list|length }}</h4>
+                    <small class="text-muted">Active Tasks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <h4 class="text-secondary">{{ tasks|rejectattr('is_active')|list|length }}</h4>
+                    <small class="text-muted">Inactive Tasks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <h4 class="text-success">£{{ "%.2f"|format(tasks|selectattr('is_active')|sum(attribute='monetary_value')|float) }}</h4>
+                    <small class="text-muted">Total Value</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-light text-center">
+                <div class="card-body">
+                    <h4 class="text-info">{{ tasks|selectattr('priority', 'equalto', 'high')|list|length }}</h4>
+                    <small class="text-muted">High Priority</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function applyFilters() {
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const priorityFilter = document.getElementById('priorityFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    // Build URL with current filters
+    const url = new URL(window.location.href);
+    url.searchParams.set('category', categoryFilter);
+    url.searchParams.set('priority', priorityFilter);
+    url.searchParams.set('status', statusFilter);
+    
+    // Navigate to filtered URL
+    window.location.href = url.toString();
+}
+
+function clearFilters() {
+    // Navigate to base URL without filters
+    window.location.href = "{{ url_for('task_list') }}";
+}
+</script>
+{% endblock %}

@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Home Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 mb-2">Welcome back, {{ current_user.get_full_name() }}!</h1>
+                            <p class="mb-0 opacity-75">Manage your team's tasks and track their progress</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <img src="https://cdn.pixabay.com/photo/2012/04/01/19/33/vacuum-24229_1280.png" 
+                                 alt="Home cleaning tasks" class="img-fluid rounded shadow" style="max-height: 120px; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h3 class="h4 mb-1">{{ workers|length }}</h3>
+                    <p class="text-muted mb-0">Active Workers</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="h4 mb-1">{{ pending_count }}</h3>
+                    <p class="text-muted mb-0">Pending Approvals</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                    </div>
+                    <h3 class="h4 mb-1">£{{ "%.2f"|format(awaiting_payment_total) }}</h3>
+                    <p class="text-muted mb-0">Awaiting Payment</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                    <h3 class="h4 mb-1">{{ active_tasks }}</h3>
+                    <p class="text-muted mb-0">Active Tasks</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body pt-3">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <a href="{{ url_for('create_task') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-plus me-2"></i>Create Task
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="{{ url_for('approval_queue') }}" class="btn btn-warning w-100">
+                                <i class="fas fa-check-circle me-2"></i>Review Approvals
+                                {% if pending_count > 0 %}
+                                <span class="badge bg-light text-warning ms-1">{{ pending_count }}</span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="{{ url_for('reports') }}" class="btn btn-success w-100">
+                                <i class="fas fa-chart-bar me-2"></i>View Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workers Overview -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users me-2"></i>Your Workers
+                        </h5>
+                        {% if workers|length == 0 %}
+                        <small class="text-muted">No workers registered yet</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if workers|length > 0 %}
+                    {% for worker in workers %}
+                    {% set payment_data = worker_payment_data[worker.id] %}
+                    <div class="worker-section mb-4">
+                        <!-- Worker Card -->
+                        <div class="card border-1 worker-card" data-worker-id="{{ worker.id }}" style="cursor: pointer;">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle p-2 me-3">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ worker.get_full_name() }}</h6>
+                                                <small class="text-muted">{{ worker.email }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <div class="small text-muted">Awaiting Payment</div>
+                                        <strong class="text-warning">
+                                            <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(payment_data.approved_total) }}
+                                        </strong>
+                                        <div class="small text-muted">{{ payment_data.approved_count }} tasks</div>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <div class="small text-muted">Total Paid</div>
+                                        <strong class="text-success">
+                                            <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(payment_data.paid_total) }}
+                                        </strong>
+                                        <div class="small text-muted">{{ payment_data.paid_count }} tasks</div>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <i class="fas fa-chevron-down expand-icon text-muted"></i>
+                                        <div class="small text-muted mt-1">Click to expand</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Table (Initially Hidden) -->
+                        <div class="payment-table" id="payment-table-{{ worker.id }}" style="display: none;">
+                            <div class="card border-top-0 mt-0">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-credit-card me-2"></i>Approved Tasks Awaiting Payment
+                                    </h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    {% if payment_data.unpaid_tasks|length > 0 %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="border-0">Task</th>
+                                                    <th class="border-0">Completed</th>
+                                                    <th class="border-0">Value</th>
+                                                    <th class="border-0">Approved</th>
+                                                    <th class="border-0">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for completion in payment_data.unpaid_tasks %}
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ completion.task.title }}</strong>
+                                                        {% if completion.task.category %}
+                                                        <br><small class="text-muted">{{ completion.task.category }}</small>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {{ completion.completion_date.strftime('%d/%m/%Y') }}
+                                                        <br><small class="text-muted">{{ completion.completion_date.strftime('%A') }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong class="text-success">
+                                                            <i class="fas fa-pound-sign me-1"></i>{{ "%.2f"|format(completion.task.monetary_value) }}
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">
+                                                            {{ completion.reviewed_at.strftime('%d/%m/%Y') }}<br>
+                                                            {{ completion.reviewed_at.strftime('%H:%M') }}
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <form method="POST" action="{{ url_for('mark_as_paid', completion_id=completion.id) }}" class="d-inline">
+                                                            <button type="submit" class="btn btn-primary btn-sm" 
+                                                                    onclick="return confirm('Mark this task as paid?')">
+                                                                <i class="fas fa-money-bill-wave me-1"></i>Mark Paid
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-check-double text-success mb-3" style="font-size: 2rem;"></i>
+                                        <h6 class="text-muted">No pending payments</h6>
+                                        <p class="text-muted mb-0">All approved tasks have been marked as paid!</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <h6 class="text-muted">No Workers Yet</h6>
+                        <p class="text-muted mb-3">Workers need to register and select you as their administrator.</p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Your Admin Email:</strong> {{ current_user.email }}<br>
+                            Share this email with workers so they can register under your account.
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.worker-card {
+    transition: all 0.3s ease;
+}
+.worker-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+.expand-icon {
+    transition: transform 0.3s ease;
+}
+.expand-icon.rotated {
+    transform: rotate(180deg);
+}
+.payment-table {
+    animation: slideDown 0.3s ease-out;
+}
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle worker card expansion
+    document.querySelectorAll('.worker-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            const workerId = this.getAttribute('data-worker-id');
+            const paymentTable = document.getElementById('payment-table-' + workerId);
+            const expandIcon = this.querySelector('.expand-icon');
+            
+            if (paymentTable.style.display === 'none' || paymentTable.style.display === '') {
+                paymentTable.style.display = 'block';
+                expandIcon.classList.add('rotated');
+            } else {
+                paymentTable.style.display = 'none';
+                expandIcon.classList.remove('rotated');
+            }
+        });
+    });
+    
+    // Add confirmation for payment actions
+    document.querySelectorAll('form[action*="mark_paid"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Are you sure you want to mark this task as paid? This action cannot be undone.')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

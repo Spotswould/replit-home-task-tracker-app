@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Home Task Tracker{% endblock %}
+
+{% block content %}
+<!-- Mobile Welcome Section -->
+<div class="d-lg-none bg-primary text-white py-4">
+    <div class="container text-center">
+        <h1 class="h2 fw-bold mb-2">Join Home Task Tracker</h1>
+        <p class="mb-0">Create your account to get started</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-plus text-primary mb-3" style="font-size: 3rem;"></i>
+                <h1 class="h3 fw-bold mb-1">Create Account</h1>
+                <p class="text-muted">Join our task management platform</p>
+            </div>
+
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.first_name.label(class="form-label fw-semibold") }}
+                                {{ form.first_name(class="form-control") }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.last_name.label(class="form-label fw-semibold") }}
+                                {{ form.last_name(class="form-control") }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label fw-semibold") }}
+                            {{ form.email(class="form-control") }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.role.label(class="form-label fw-semibold") }}
+                            {{ form.role(class="form-control", id="role-select") }}
+                            {% if form.role.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.role.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <small><strong>Admin:</strong> Can create tasks and manage workers<br>
+                                <strong>Worker:</strong> Can complete tasks assigned by admin</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" id="admin-email-field" style="display: {% if form.role.data == 'worker' or form.admin_email.errors %}block{% else %}none{% endif %};">
+                            {{ form.admin_email.label(class="form-label fw-semibold") }}
+                            {{ form.admin_email(class="form-control") }}
+                            {% if form.admin_email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.admin_email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter the email address of the administrator you'll be working under</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.password.label(class="form-label fw-semibold") }}
+                                {{ form.password(class="form-control") }}
+                                {% if form.password.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1"></i><strong>Password Requirements:</strong><br>
+                                        • Minimum 6 characters (required)<br>
+                                        • Can be any combination: letters, numbers, or symbols<br>
+                                        • <em>Recommendation:</em> Use a mix of letters, numbers, and symbols for better security
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                {{ form.confirm_password.label(class="form-label fw-semibold") }}
+                                {{ form.confirm_password(class="form-control") }}
+                                {% if form.confirm_password.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.confirm_password.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <small>
+                                        <i class="fas fa-check-circle me-1"></i>Re-enter your password to confirm it matches
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted mb-2">Already have an account?</p>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role-select');
+    const adminEmailField = document.getElementById('admin-email-field');
+    const adminEmailInput = adminEmailField.querySelector('input[type="text"]');
+    
+    function toggleAdminEmailField() {
+        if (roleSelect.value === 'worker') {
+            adminEmailField.style.display = 'block';
+        } else {
+            adminEmailField.style.display = 'none';
+            // Clear the admin email field when switching to admin
+            if (adminEmailInput) {
+                adminEmailInput.value = '';
+            }
+        }
+    }
+    
+    // Set initial state based on current role value
+    toggleAdminEmailField();
+    
+    // Handle role changes
+    roleSelect.addEventListener('change', toggleAdminEmailField);
+});
+</script>
+{% endblock %}
